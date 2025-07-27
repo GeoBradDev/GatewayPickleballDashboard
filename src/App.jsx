@@ -303,7 +303,9 @@ export default function Dashboard() {
                                     title={femaleOnly ? "Female Players" : "Female %"}
                                     value={femaleOnly 
                                         ? filteredPlayers.length
-                                        : `${Math.round(players.filter(p => p.players?.female).length / players.length * 100) || 0}%`
+                                        : players.length === 0 
+                                            ? '0%' 
+                                            : `${Math.round(players.filter(p => p.players?.female).length / players.length * 100)}%`
                                     }
                                 />
                             </Grid>
