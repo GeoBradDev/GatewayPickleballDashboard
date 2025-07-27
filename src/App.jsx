@@ -308,12 +308,12 @@ export default function Dashboard() {
                     </Box>
                 </Box>
 
-                {/* MVP and Podium Section */}
+                {/* MVP, Podium, and Win/Loss Section */}
                 <Box mb={6} sx={{ display: 'flex', justifyContent: 'center' }}>
-                    <Box sx={{ width: '100%', maxWidth: '1300px' }}>
+                    <Box sx={{ width: '100%', maxWidth: '1400px' }}>
                         <Grid container spacing={{ xs: 3, sm: 4, md: 6 }} justifyContent="center" alignItems="stretch">
                             {/* MVP of the Week */}
-                            <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column' }}>
+                            <Grid item xs={12} lg={3} sx={{ display: 'flex', flexDirection: 'column' }}>
                                 <Box mb={3} sx={{ textAlign: 'center' }}>
                                     <Typography 
                                         variant="h4" 
@@ -333,7 +333,7 @@ export default function Dashboard() {
                             </Grid>
 
                             {/* Podium */}
-                            <Grid item xs={12} md={8} sx={{ display: 'flex', flexDirection: 'column' }}>
+                            <Grid item xs={12} lg={6} sx={{ display: 'flex', flexDirection: 'column' }}>
                                 <Box mb={3} sx={{ textAlign: 'center' }}>
                                     <Typography 
                                         variant="h4" 
@@ -365,148 +365,143 @@ export default function Dashboard() {
                                     </Box>
                                 </Paper>
                             </Grid>
+
+                            {/* Win/Loss Breakdown */}
+                            <Grid item xs={12} lg={3} sx={{ display: 'flex', flexDirection: 'column' }}>
+                                <Box mb={3} sx={{ textAlign: 'center' }}>
+                                    <Typography 
+                                        variant="h4" 
+                                        sx={{ 
+                                            mb: 2, 
+                                            color: 'text.primary',
+                                            fontWeight: 700,
+                                            fontSize: { xs: '1.5rem', md: '2rem' }
+                                        }}
+                                    >
+                                        Win/Loss Ratios
+                                    </Typography>
+                                </Box>
+                                <Paper 
+                                    elevation={0} 
+                                    sx={{ 
+                                        p: 3, 
+                                        borderRadius: 4,
+                                        background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.05) 0%, rgba(255, 107, 53, 0.02) 100%)',
+                                        border: '1px solid rgba(0, 217, 255, 0.1)',
+                                        backdropFilter: 'blur(20px)',
+                                        flex: 1,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <Box sx={{ width: '100%' }}>
+                                        <WinLossPieCharts players={podium} />
+                                    </Box>
+                                </Paper>
+                            </Grid>
                         </Grid>
                     </Box>
                 </Box>
 
-                {/* Main Content Grid */}
+                {/* Elo Over Time Chart - Full Width */}
                 <Box mb={6} sx={{ display: 'flex', justifyContent: 'center' }}>
                     <Box sx={{ width: '100%', maxWidth: '1400px' }}>
-                        <Grid container spacing={{ xs: 3, sm: 4, md: 6 }}>
-                            {/* Left Column */}
-                            <Grid item xs={12} lg={8} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                {/* Elo Chart */}
-                                <Box mb={4} sx={{ width: '100%', maxWidth: '800px' }}>
-                                    <Typography 
-                                        variant="h5" 
-                                        sx={{ 
-                                            mb: 2, 
-                                            color: 'text.primary',
-                                            fontWeight: 700,
-                                            display: 'flex', 
-                                            alignItems: 'center', 
-                                            justifyContent: 'center',
-                                            gap: 1,
-                                            fontSize: { xs: '1.25rem', md: '1.5rem' }
-                                        }}
-                                    >
-                                        Performance Analytics
-                                    </Typography>
-                                    <Paper 
-                                        elevation={0} 
-                                        sx={{ 
-                                            p: 3, 
-                                            borderRadius: 4, 
-                                            minHeight: 350,
-                                            background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.05) 0%, rgba(255, 107, 53, 0.02) 100%)',
-                                            border: '1px solid rgba(0, 217, 255, 0.1)',
-                                            backdropFilter: 'blur(20px)',
-                                        }}
-                                    >
-                                        <EloChart week={week} />
-                                    </Paper>
-                                </Box>
+                        <Typography 
+                            variant="h4" 
+                            sx={{ 
+                                mb: 3, 
+                                color: 'text.primary',
+                                fontWeight: 700,
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                gap: 1,
+                                fontSize: { xs: '1.5rem', md: '2rem' }
+                            }}
+                        >
+                            Elo Over Time
+                        </Typography>
+                        <Paper 
+                            elevation={0} 
+                            sx={{ 
+                                p: 4, 
+                                borderRadius: 4, 
+                                minHeight: 400,
+                                background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.05) 0%, rgba(255, 107, 53, 0.02) 100%)',
+                                border: '1px solid rgba(0, 217, 255, 0.1)',
+                                backdropFilter: 'blur(20px)',
+                            }}
+                        >
+                            <EloChart week={week} />
+                        </Paper>
+                    </Box>
+                </Box>
 
-                                {/* Most Improved */}
-                                <Box mb={4} sx={{ width: '100%', maxWidth: '800px' }}>
-                                    <Typography 
-                                        variant="h5" 
-                                        sx={{ 
-                                            mb: 2, 
-                                            color: 'text.primary',
-                                            fontWeight: 700,
-                                            display: 'flex', 
-                                            alignItems: 'center', 
-                                            justifyContent: 'center',
-                                            gap: 1,
-                                            fontSize: { xs: '1.25rem', md: '1.5rem' }
-                                        }}
-                                    >
-                                        Rising Stars (Week {week})
-                                    </Typography>
-                                    <Paper 
-                                        elevation={0} 
-                                        sx={{ 
-                                            p: 3, 
-                                            borderRadius: 4, 
-                                            minHeight: 350,
-                                            background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.05) 0%, rgba(255, 107, 53, 0.02) 100%)',
-                                            border: '1px solid rgba(0, 217, 255, 0.1)',
-                                            backdropFilter: 'blur(20px)',
-                                        }}
-                                    >
-                                        <MostImprovedChart week={week} />
-                                    </Paper>
-                                </Box>
+                {/* Rising Stars Chart - Full Width */}
+                <Box mb={6} sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Box sx={{ width: '100%', maxWidth: '1400px' }}>
+                        <Typography 
+                            variant="h4" 
+                            sx={{ 
+                                mb: 3, 
+                                color: 'text.primary',
+                                fontWeight: 700,
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                gap: 1,
+                                fontSize: { xs: '1.5rem', md: '2rem' }
+                            }}
+                        >
+                            Top 10 Improving Players
+                        </Typography>
+                        <Paper 
+                            elevation={0} 
+                            sx={{ 
+                                p: 4, 
+                                borderRadius: 4, 
+                                minHeight: 400,
+                                background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.05) 0%, rgba(255, 107, 53, 0.02) 100%)',
+                                border: '1px solid rgba(0, 217, 255, 0.1)',
+                                backdropFilter: 'blur(20px)',
+                            }}
+                        >
+                            <MostImprovedChart week={week} />
+                        </Paper>
+                    </Box>
+                </Box>
 
-                                {/* W/L Pie Charts */}
-                                <Box mb={4} sx={{ width: '100%', maxWidth: '800px' }}>
-                                    <Typography 
-                                        variant="h5" 
-                                        sx={{ 
-                                            mb: 2, 
-                                            color: 'text.primary',
-                                            fontWeight: 700,
-                                            display: 'flex', 
-                                            alignItems: 'center', 
-                                            justifyContent: 'center',
-                                            gap: 1,
-                                            fontSize: { xs: '1.25rem', md: '1.5rem' }
-                                        }}
-                                    >
-                                        Win/Loss Breakdown
-                                    </Typography>
-                                    <Paper 
-                                        elevation={0} 
-                                        sx={{ 
-                                            p: 3, 
-                                            borderRadius: 4, 
-                                            minHeight: 300,
-                                            background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.05) 0%, rgba(255, 107, 53, 0.02) 100%)',
-                                            border: '1px solid rgba(0, 217, 255, 0.1)',
-                                            backdropFilter: 'blur(20px)',
-                                        }}
-                                    >
-                                        <WinLossPieCharts players={podium} />
-                                    </Paper>
-                                </Box>
-                            </Grid>
-
-                            {/* Right Column */}
-                            <Grid item xs={12} lg={4} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                {/* Leaderboard */}
-                                <Box mb={4} sx={{ width: '100%', maxWidth: '400px' }}>
-                                    <Typography 
-                                        variant="h5" 
-                                        sx={{ 
-                                            mb: 2, 
-                                            color: 'text.primary',
-                                            fontWeight: 700,
-                                            display: 'flex', 
-                                            alignItems: 'center', 
-                                            justifyContent: 'center',
-                                            gap: 1,
-                                            fontSize: { xs: '1.25rem', md: '1.5rem' }
-                                        }}
-                                    >
-                                        Elite Rankings
-                                    </Typography>
-                                    <Paper 
-                                        elevation={0} 
-                                        sx={{ 
-                                            p: 3, 
-                                            borderRadius: 4, 
-                                            minHeight: 600,
-                                            background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.05) 0%, rgba(255, 107, 53, 0.02) 100%)',
-                                            border: '1px solid rgba(0, 217, 255, 0.1)',
-                                            backdropFilter: 'blur(20px)',
-                                        }}
-                                    >
-                                        <Leaderboard players={top10} />
-                                    </Paper>
-                                </Box>
-                            </Grid>
-                        </Grid>
+                {/* Leaderboard Section */}
+                <Box mb={6} sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Box sx={{ width: '100%', maxWidth: '600px' }}>
+                        <Typography 
+                            variant="h4" 
+                            sx={{ 
+                                mb: 3, 
+                                color: 'text.primary',
+                                fontWeight: 700,
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                gap: 1,
+                                fontSize: { xs: '1.5rem', md: '2rem' }
+                            }}
+                        >
+                            Elite Rankings
+                        </Typography>
+                        <Paper 
+                            elevation={0} 
+                            sx={{ 
+                                p: 4, 
+                                borderRadius: 4, 
+                                minHeight: 600,
+                                background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.05) 0%, rgba(255, 107, 53, 0.02) 100%)',
+                                border: '1px solid rgba(0, 217, 255, 0.1)',
+                                backdropFilter: 'blur(20px)',
+                            }}
+                        >
+                            <Leaderboard players={top10} />
+                        </Paper>
                     </Box>
                 </Box>
                 </Box>

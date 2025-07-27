@@ -11,7 +11,7 @@ export default function MostImprovedChart({week}) {
 
         const fetchImprovement = async () => {
             const {data, error} = await supabase
-                .rpc('most_improved', {week}); // RPC functions take an object of arguments
+                .rpc('most_improved');
 
             if (error) {
                 console.error('Error fetching most improved:', error.message);
@@ -26,7 +26,7 @@ export default function MostImprovedChart({week}) {
 
     return (
         <Paper elevation={3} sx={{p: 2, mt: 4}}>
-            <Typography variant="h6" gutterBottom>📊 Most Improved (Week {week})</Typography>
+            <Typography variant="h6" gutterBottom>Most Improved</Typography>
             <ResponsiveContainer width="100%" height={300}>
                 <BarChart layout="vertical" data={data} margin={{left: 30}}>
                     <XAxis type="number"/>
