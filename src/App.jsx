@@ -8,7 +8,7 @@ import MostImprovedChart from '../components/MostImprovedChart';
 import WinLossPieCharts from '../components/WinLossChart';
 import Leaderboard from '../components/Leaderboard';
 import MVPOfWeek from '../components/MVPOfWeek';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from './lib/supabaseClient';
 
 const darkTheme = createTheme({
     palette: {

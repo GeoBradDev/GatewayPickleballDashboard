@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Paper, Typography} from '@mui/material';
 import {BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LabelList} from 'recharts';
-import {supabase} from '../lib/supabaseClient';
+import {supabase} from '../src/lib/supabaseClient';
 
 export default function MostImprovedChart({week}) {
     const [data, setData] = useState([]);
@@ -25,7 +25,7 @@ export default function MostImprovedChart({week}) {
     }, [week]);
 
     return (
-        <>
+        <Paper elevation={3} sx={{ p: 2, mt: 4 }}>
             <Typography variant="h6" gutterBottom>Most Improved</Typography>
             <ResponsiveContainer width="100%" height={300}>
                 <BarChart layout="vertical" data={data} margin={{left: 30}}>
@@ -38,5 +38,6 @@ export default function MostImprovedChart({week}) {
                 </BarChart>
             </ResponsiveContainer>
         </Paper>
+
     );
 }
