@@ -25,7 +25,7 @@ export default function MostImprovedChart({week}) {
     }, [week]);
 
     return (
-        <Paper elevation={3} sx={{p: 2, mt: 4}}>
+        <>
             <Typography variant="h6" gutterBottom>Most Improved</Typography>
             <ResponsiveContainer width="100%" height={300}>
                 <BarChart layout="vertical" data={data} margin={{left: 30}}>
