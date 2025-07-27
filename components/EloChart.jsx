@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Paper, Typography} from '@mui/material';
 import {LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer} from 'recharts';
-import {supabase} from '../src/lib/supabaseClient';
+import {supabase} from '../lib/supabaseClient';
 
 export default function EloChart({week}) {
     const [chartData, setChartData] = useState([]);
