@@ -44,7 +44,7 @@ export default function EloChart({week}) {
 
     return (
         <Paper elevation={3} sx={{p: 2, mt: 4}}>
-            <Typography variant="h6" gutterBottom>📈 Elo Over Time</Typography>
+            <Typography variant="h6" gutterBottom>Elo Over Time</Typography>
             <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={chartData}>
                     <XAxis dataKey="week"/>

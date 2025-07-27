@@ -7,6 +7,7 @@ import Podium from '../components/Podium';
 import MostImprovedChart from '../components/MostImprovedChart';
 import WinLossPieCharts from '../components/WinLossChart';
 import Leaderboard from '../components/Leaderboard';
+import MVPOfWeek from '../components/MVPOfWeek';
 import { supabase } from './lib/supabaseClient';
 
 const darkTheme = createTheme({
@@ -100,22 +101,61 @@ const darkTheme = createTheme({
 
 export default function Dashboard() {
     const [players, setPlayers] = useState([]);
+    const [previousWeekPlayers, setPreviousWeekPlayers] = useState([]);
     const [week] = useState(0);
     const [femaleOnly, setFemaleOnly] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
-            const { data, error } = await supabase
+            // Fetch current week data
+            const { data: currentData, error: currentError } = await supabase
                 .from('weekly_rankings')
                 .select('player_id, rank, elo, wins, losses, players(name, female)')
                 .eq('week', week)
                 .order('rank');
 
-            if (!error) setPlayers(data);
+            if (!currentError) setPlayers(currentData);
+
+            // Fetch previous week data for MVP calculation
+            const { data: previousData, error: previousError } = await supabase
+                .from('weekly_rankings')
+                .select('player_id, rank, elo, wins, losses, players(name, female)')
+                .eq('week', week - 1)
+                .order('rank');
+
+            if (!previousError) setPreviousWeekPlayers(previousData);
         };
 
         fetchData();
     }, [week]);
+
+    // Calculate MVP (player with greatest Elo increase)
+    const calculateMVP = () => {
+        if (!players.length || !previousWeekPlayers.length) return null;
+
+        let mvpPlayer = null;
+        let maxIncrease = 0;
+
+        players.forEach(currentPlayer => {
+            const previousPlayer = previousWeekPlayers.find(
+                prev => prev.player_id === currentPlayer.player_id
+            );
+
+            if (previousPlayer) {
+                const eloIncrease = currentPlayer.elo - previousPlayer.elo;
+                if (eloIncrease > maxIncrease) {
+                    maxIncrease = eloIncrease;
+                    mvpPlayer = {
+                        ...currentPlayer,
+                        eloIncrease: eloIncrease,
+                        previousElo: previousPlayer.elo
+                    };
+                }
+            }
+        });
+
+        return mvpPlayer;
+    };
 
     // Filter players based on female toggle
     const filteredPlayers = femaleOnly 
@@ -124,6 +164,7 @@ export default function Dashboard() {
     
     const top10 = filteredPlayers.slice(0, 10);
     const podium = filteredPlayers.slice(0, 3);
+    const mvpPlayer = calculateMVP();
 
     return (
         <ThemeProvider theme={darkTheme}>
@@ -131,25 +172,26 @@ export default function Dashboard() {
             <Box sx={{ 
                 minHeight: '100vh', 
                 width: '100vw',
-                margin: 0,
-                padding: 0,
-                position: 'absolute',
-                top: 0,
-                left: 0,
                 background: 'radial-gradient(ellipse at top, #0f1419 0%, #0a0a0f 50%, #000005 100%)',
+                display: 'flex',
+                justifyContent: 'center',
+                position: 'relative',
                 '&::before': {
                     content: '""',
-                    position: 'absolute',
+                    position: 'fixed',
                     top: 0,
                     left: 0,
                     right: 0,
                     bottom: 0,
                     background: 'radial-gradient(circle at 20% 20%, rgba(0, 217, 255, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255, 107, 53, 0.1) 0%, transparent 50%)',
                     pointerEvents: 'none',
+                    zIndex: -1,
                 }
             }}>
                 <Box sx={{
-                    px: { xs: 3, sm: 4, md: 6 }, 
+                    width: '100%',
+                    maxWidth: '1400px',
+                    px: { xs: 2, sm: 3, md: 4 }, 
                     py: { xs: 3, sm: 4, md: 6 },
                     position: 'relative',
                     zIndex: 1,
@@ -192,7 +234,7 @@ export default function Dashboard() {
                                 fontSize: { xs: '0.9rem', sm: '1rem' }
                             }}
                         >
-                            Pickleball League Dashboard
+                            St Louis Pickleball League Dashboard
                         </Typography>
                     </Box>
                     
@@ -241,204 +283,232 @@ export default function Dashboard() {
                 </Box>
 
                 {/* Stat Cards */}
-                <Grid container spacing={{ xs: 3, sm: 4 }} mb={8}>
-                    <Grid item xs={12} sm={6} md={3}>
-                        <StatCard title="Total Players" value={filteredPlayers.length} />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                        <StatCard title="Matches Played" value="0" />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                        <StatCard title="Top Elo" value={filteredPlayers[0]?.elo || 'N/A'} />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                        <StatCard
-                            title={femaleOnly ? "Female Players" : "Female %"}
-                            value={femaleOnly 
-                                ? filteredPlayers.length
-                                : `${Math.round(players.filter(p => p.players?.female).length / players.length * 100) || 0}%`
-                            }
-                        />
-                    </Grid>
-                </Grid>
+                <Box mb={6} sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Box sx={{ width: '100%', maxWidth: '1200px' }}>
+                        <Grid container spacing={{ xs: 2, sm: 3, md: 4 }} justifyContent="center">
+                            <Grid item xs={12} sm={6} md={3}>
+                                <StatCard title="Total Players" value={filteredPlayers.length} />
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={3}>
+                                <StatCard title="Matches Played" value="0" />
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={3}>
+                                <StatCard title="Top Elo" value={filteredPlayers[0]?.elo || 'N/A'} />
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={3}>
+                                <StatCard
+                                    title={femaleOnly ? "Female Players" : "Female %"}
+                                    value={femaleOnly 
+                                        ? filteredPlayers.length
+                                        : `${Math.round(players.filter(p => p.players?.female).length / players.length * 100) || 0}%`
+                                    }
+                                />
+                            </Grid>
+                        </Grid>
+                    </Box>
+                </Box>
 
-                {/* Podium */}
-                <Box mb={8}>
-                    <Typography 
-                        variant="h4" 
-                        sx={{ 
-                            mb: 4, 
-                            color: 'text.primary',
-                            fontWeight: 700,
-                            textAlign: 'center',
-                            '&::before': {
-                                content: '"🏆"',
-                                fontSize: '3rem',
-                                display: 'block',
-                                mb: 2,
-                            }
-                        }}
-                    >
-                        Champions Podium
-                    </Typography>
-                    <Paper 
-                        elevation={0} 
-                        sx={{ 
-                            p: 4, 
-                            borderRadius: 4,
-                            background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.05) 0%, rgba(255, 107, 53, 0.02) 100%)',
-                            border: '1px solid rgba(0, 217, 255, 0.1)',
-                            backdropFilter: 'blur(20px)',
-                        }}
-                    >
-                        <Podium players={podium} />
-                    </Paper>
+                {/* MVP and Podium Section */}
+                <Box mb={6} sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Box sx={{ width: '100%', maxWidth: '1300px' }}>
+                        <Grid container spacing={{ xs: 3, sm: 4, md: 6 }} justifyContent="center" alignItems="stretch">
+                            {/* MVP of the Week */}
+                            <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column' }}>
+                                <Box mb={3} sx={{ textAlign: 'center' }}>
+                                    <Typography 
+                                        variant="h4" 
+                                        sx={{ 
+                                            mb: 2, 
+                                            color: 'text.primary',
+                                            fontWeight: 700,
+                                            fontSize: { xs: '1.5rem', md: '2rem' }
+                                        }}
+                                    >
+                                        ⭐ Weekly MVP
+                                    </Typography>
+                                </Box>
+                                <Box sx={{ flex: 1, display: 'flex' }}>
+                                    <MVPOfWeek mvpPlayer={mvpPlayer} />
+                                </Box>
+                            </Grid>
+
+                            {/* Podium */}
+                            <Grid item xs={12} md={8} sx={{ display: 'flex', flexDirection: 'column' }}>
+                                <Box mb={3} sx={{ textAlign: 'center' }}>
+                                    <Typography 
+                                        variant="h4" 
+                                        sx={{ 
+                                            mb: 2, 
+                                            color: 'text.primary',
+                                            fontWeight: 700,
+                                            fontSize: { xs: '1.5rem', md: '2rem' }
+                                        }}
+                                    >
+                                        🏆 Champions Podium
+                                    </Typography>
+                                </Box>
+                                <Paper 
+                                    elevation={0} 
+                                    sx={{ 
+                                        p: 3, 
+                                        borderRadius: 4,
+                                        background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.05) 0%, rgba(255, 107, 53, 0.02) 100%)',
+                                        border: '1px solid rgba(0, 217, 255, 0.1)',
+                                        backdropFilter: 'blur(20px)',
+                                        flex: 1,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <Box sx={{ width: '100%' }}>
+                                        <Podium players={podium} />
+                                    </Box>
+                                </Paper>
+                            </Grid>
+                        </Grid>
+                    </Box>
                 </Box>
 
                 {/* Main Content Grid */}
-                <Grid container spacing={{ xs: 3, sm: 4, md: 6 }}>
-                    {/* Left Column */}
-                    <Grid item xs={12} lg={8}>
-                        {/* Elo Chart */}
-                        <Box mb={6}>
-                            <Typography 
-                                variant="h5" 
-                                sx={{ 
-                                    mb: 3, 
-                                    color: 'text.primary',
-                                    fontWeight: 700,
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    gap: 2,
-                                    '&::before': {
-                                        content: '"📈"',
-                                        fontSize: '2rem',
-                                    }
-                                }}
-                            >
-                                Performance Analytics
-                            </Typography>
-                            <Paper 
-                                elevation={0} 
-                                sx={{ 
-                                    p: 4, 
-                                    borderRadius: 4, 
-                                    minHeight: 400,
-                                    background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.05) 0%, rgba(255, 107, 53, 0.02) 100%)',
-                                    border: '1px solid rgba(0, 217, 255, 0.1)',
-                                    backdropFilter: 'blur(20px)',
-                                }}
-                            >
-                                <EloChart week={week} />
-                            </Paper>
-                        </Box>
+                <Box mb={6} sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Box sx={{ width: '100%', maxWidth: '1400px' }}>
+                        <Grid container spacing={{ xs: 3, sm: 4, md: 6 }}>
+                            {/* Left Column */}
+                            <Grid item xs={12} lg={8} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                {/* Elo Chart */}
+                                <Box mb={4} sx={{ width: '100%', maxWidth: '800px' }}>
+                                    <Typography 
+                                        variant="h5" 
+                                        sx={{ 
+                                            mb: 2, 
+                                            color: 'text.primary',
+                                            fontWeight: 700,
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            justifyContent: 'center',
+                                            gap: 1,
+                                            fontSize: { xs: '1.25rem', md: '1.5rem' }
+                                        }}
+                                    >
+                                        Performance Analytics
+                                    </Typography>
+                                    <Paper 
+                                        elevation={0} 
+                                        sx={{ 
+                                            p: 3, 
+                                            borderRadius: 4, 
+                                            minHeight: 350,
+                                            background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.05) 0%, rgba(255, 107, 53, 0.02) 100%)',
+                                            border: '1px solid rgba(0, 217, 255, 0.1)',
+                                            backdropFilter: 'blur(20px)',
+                                        }}
+                                    >
+                                        <EloChart week={week} />
+                                    </Paper>
+                                </Box>
 
-                        {/* Most Improved */}
-                        <Box mb={6}>
-                            <Typography 
-                                variant="h5" 
-                                sx={{ 
-                                    mb: 3, 
-                                    color: 'text.primary',
-                                    fontWeight: 700,
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    gap: 2,
-                                    '&::before': {
-                                        content: '"📊"',
-                                        fontSize: '2rem',
-                                    }
-                                }}
-                            >
-                                Rising Stars (Week {week})
-                            </Typography>
-                            <Paper 
-                                elevation={0} 
-                                sx={{ 
-                                    p: 4, 
-                                    borderRadius: 4, 
-                                    minHeight: 400,
-                                    background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.05) 0%, rgba(255, 107, 53, 0.02) 100%)',
-                                    border: '1px solid rgba(0, 217, 255, 0.1)',
-                                    backdropFilter: 'blur(20px)',
-                                }}
-                            >
-                                <MostImprovedChart week={week} />
-                            </Paper>
-                        </Box>
+                                {/* Most Improved */}
+                                <Box mb={4} sx={{ width: '100%', maxWidth: '800px' }}>
+                                    <Typography 
+                                        variant="h5" 
+                                        sx={{ 
+                                            mb: 2, 
+                                            color: 'text.primary',
+                                            fontWeight: 700,
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            justifyContent: 'center',
+                                            gap: 1,
+                                            fontSize: { xs: '1.25rem', md: '1.5rem' }
+                                        }}
+                                    >
+                                        Rising Stars (Week {week})
+                                    </Typography>
+                                    <Paper 
+                                        elevation={0} 
+                                        sx={{ 
+                                            p: 3, 
+                                            borderRadius: 4, 
+                                            minHeight: 350,
+                                            background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.05) 0%, rgba(255, 107, 53, 0.02) 100%)',
+                                            border: '1px solid rgba(0, 217, 255, 0.1)',
+                                            backdropFilter: 'blur(20px)',
+                                        }}
+                                    >
+                                        <MostImprovedChart week={week} />
+                                    </Paper>
+                                </Box>
 
-                        {/* W/L Pie Charts */}
-                        <Box mb={6}>
-                            <Typography 
-                                variant="h5" 
-                                sx={{ 
-                                    mb: 3, 
-                                    color: 'text.primary',
-                                    fontWeight: 700,
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    gap: 2,
-                                    '&::before': {
-                                        content: '"🥧"',
-                                        fontSize: '2rem',
-                                    }
-                                }}
-                            >
-                                Win/Loss Breakdown
-                            </Typography>
-                            <Paper 
-                                elevation={0} 
-                                sx={{ 
-                                    p: 4, 
-                                    borderRadius: 4, 
-                                    minHeight: 350,
-                                    background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.05) 0%, rgba(255, 107, 53, 0.02) 100%)',
-                                    border: '1px solid rgba(0, 217, 255, 0.1)',
-                                    backdropFilter: 'blur(20px)',
-                                }}
-                            >
-                                <WinLossPieCharts players={podium} />
-                            </Paper>
-                        </Box>
-                    </Grid>
+                                {/* W/L Pie Charts */}
+                                <Box mb={4} sx={{ width: '100%', maxWidth: '800px' }}>
+                                    <Typography 
+                                        variant="h5" 
+                                        sx={{ 
+                                            mb: 2, 
+                                            color: 'text.primary',
+                                            fontWeight: 700,
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            justifyContent: 'center',
+                                            gap: 1,
+                                            fontSize: { xs: '1.25rem', md: '1.5rem' }
+                                        }}
+                                    >
+                                        Win/Loss Breakdown
+                                    </Typography>
+                                    <Paper 
+                                        elevation={0} 
+                                        sx={{ 
+                                            p: 3, 
+                                            borderRadius: 4, 
+                                            minHeight: 300,
+                                            background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.05) 0%, rgba(255, 107, 53, 0.02) 100%)',
+                                            border: '1px solid rgba(0, 217, 255, 0.1)',
+                                            backdropFilter: 'blur(20px)',
+                                        }}
+                                    >
+                                        <WinLossPieCharts players={podium} />
+                                    </Paper>
+                                </Box>
+                            </Grid>
 
-                    {/* Right Column */}
-                    <Grid item xs={12} lg={4}>
-                        {/* Leaderboard */}
-                        <Box mb={6}>
-                            <Typography 
-                                variant="h5" 
-                                sx={{ 
-                                    mb: 3, 
-                                    color: 'text.primary',
-                                    fontWeight: 700,
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    gap: 2,
-                                    '&::before': {
-                                        content: '"📋"',
-                                        fontSize: '2rem',
-                                    }
-                                }}
-                            >
-                                Elite Rankings
-                            </Typography>
-                            <Paper 
-                                elevation={0} 
-                                sx={{ 
-                                    p: 4, 
-                                    borderRadius: 4, 
-                                    minHeight: 700,
-                                    background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.05) 0%, rgba(255, 107, 53, 0.02) 100%)',
-                                    border: '1px solid rgba(0, 217, 255, 0.1)',
-                                    backdropFilter: 'blur(20px)',
-                                }}
-                            >
-                                <Leaderboard players={top10} />
-                            </Paper>
-                        </Box>
-                    </Grid>
-                </Grid>
+                            {/* Right Column */}
+                            <Grid item xs={12} lg={4} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                {/* Leaderboard */}
+                                <Box mb={4} sx={{ width: '100%', maxWidth: '400px' }}>
+                                    <Typography 
+                                        variant="h5" 
+                                        sx={{ 
+                                            mb: 2, 
+                                            color: 'text.primary',
+                                            fontWeight: 700,
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            justifyContent: 'center',
+                                            gap: 1,
+                                            fontSize: { xs: '1.25rem', md: '1.5rem' }
+                                        }}
+                                    >
+                                        Elite Rankings
+                                    </Typography>
+                                    <Paper 
+                                        elevation={0} 
+                                        sx={{ 
+                                            p: 3, 
+                                            borderRadius: 4, 
+                                            minHeight: 600,
+                                            background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.05) 0%, rgba(255, 107, 53, 0.02) 100%)',
+                                            border: '1px solid rgba(0, 217, 255, 0.1)',
+                                            backdropFilter: 'blur(20px)',
+                                        }}
+                                    >
+                                        <Leaderboard players={top10} />
+                                    </Paper>
+                                </Box>
+                            </Grid>
+                        </Grid>
+                    </Box>
+                </Box>
                 </Box>
             </Box>
         </ThemeProvider>

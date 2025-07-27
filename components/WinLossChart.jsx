@@ -16,7 +16,7 @@ export default function WinLossPieCharts({ players }) {
                     <Grid item xs={12} sm={4} key={player.player_id}>
                         <Paper elevation={3} sx={{ p: 2 }}>
                             <Typography variant="h6" gutterBottom>
-                                🥇🥈🥉{['1st', '2nd', '3rd'][i]}: {player.players.name}
+                                {['🥇 1st', '🥈 2nd', '🥉 3rd'][i]}: {player.players.name}
                             </Typography>
                             <ResponsiveContainer width="100%" height={250}>
                                 <PieChart>
