@@ -290,7 +290,10 @@ export default function Dashboard() {
                                 <StatCard title="Total Players" value={filteredPlayers.length} />
                             </Grid>
                             <Grid item xs={12} sm={6} md={3}>
-                                <StatCard title="Matches Played" value="0" />
+                                <StatCard 
+                                    title="Matches Played" 
+                                    value={players.reduce((total, player) => total + (player.matchesPlayed || 0), 0) || 'N/A'} 
+                                />
                             </Grid>
                             <Grid item xs={12} sm={6} md={3}>
                                 <StatCard title="Top Elo" value={filteredPlayers[0]?.elo || 'N/A'} />
