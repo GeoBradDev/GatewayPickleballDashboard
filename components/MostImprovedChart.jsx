@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Paper, Typography} from '@mui/material';
 import {BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LabelList} from 'recharts';
-import {supabase} from '../src/lib/supabaseClient';
+import {supabase} from '../lib/supabaseClient';
 
 export default function MostImprovedChart({week}) {
     const [data, setData] = useState([]);
